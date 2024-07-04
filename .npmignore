@@ -1,0 +1,5 @@
+# Ignore all files and directories
+*
+
+# But not the `es` directory
+!es/**/*

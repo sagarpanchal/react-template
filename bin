@@ -1,0 +1,2 @@
+#!/usr/bin/env vite-node --script
+import "./scripts/bin"
