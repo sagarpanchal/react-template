@@ -1,8 +1,10 @@
+"use client"
 import React from "react"
 
 const styles: Record<string, React.CSSProperties> = {
   item: { alignItems: "center", display: "inline-flex", gap: "inherit" },
   list: { alignItems: "center", display: "flex", gap: "inherit", listStyle: "none", wordWrap: "break-word" },
+  separator: { alignItems: "center", display: "inline-flex" },
 }
 
 const BreadcrumbContext = React.createContext({ separator: null as React.ReactNode })
@@ -19,16 +21,16 @@ const useBreadcrumbItemContext = () => {
   return context
 }
 
-type BreadcrumbSeparatorProps = Omit<React.ComponentPropsWithoutRef<"span">, "children">
+type BreadcrumbSeparatorProps = React.ComponentPropsWithoutRef<"span">
 function BreadcrumbSeparator(props: BreadcrumbSeparatorProps): JSX.Element | null {
+  const { children, style, role = "presentation", ...restProps } = props
   const { separator } = useBreadcrumbContext()
   const { isLast } = useBreadcrumbItemContext()
 
   if (!separator || isLast) return null
-
   return (
-    <span role="presentation" {...props}>
-      {separator}
+    <span role={role} style={{ ...styles.separator, ...style }} {...restProps}>
+      {children ?? separator}
     </span>
   )
 }
@@ -38,12 +40,13 @@ type BreadcrumbLinkProps<T extends React.ElementType = "a"> = React.ComponentPro
   href?: string
 }
 function BreadcrumbLink<T extends React.ElementType = "a">(props: BreadcrumbLinkProps<T>): JSX.Element {
-  const { as: Component = "a", ...restProps } = props
+  const { as = "a", ...restProps } = props
   const { isCurrent } = useBreadcrumbItemContext()
 
-  return (
-    <Component {...restProps} aria-current={isCurrent ? "page" : undefined} href={isCurrent ? "" : restProps.href} />
-  )
+  const Component = isCurrent ? "span" : as
+  if (isCurrent) delete restProps.href
+
+  return <Component {...restProps} aria-current={isCurrent ? "page" : undefined} />
 }
 
 type BreadcrumbItemProps = React.ComponentPropsWithoutRef<"li"> & { isCurrentPage?: boolean }
@@ -83,5 +86,5 @@ function Breadcrumb(props: BreadcrumbProps): JSX.Element {
   )
 }
 
-export { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator }
 export type { BreadcrumbProps, BreadcrumbItemProps, BreadcrumbLinkProps, BreadcrumbSeparatorProps }
+export { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator }
